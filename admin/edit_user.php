@@ -1,140 +1,4 @@
-
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
-    <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f6f8;
-        color: #333;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-       
-      }
-      .container1 {
-        background-color: #000000;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        width: 20%;
-        max-width: 900px;
-        text-align: center;
-        margin: 20px;
-        height:600px;
-      }
-      .container2 {
-        background-color: #000000;
-        border-radius: 10px;
-        box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        padding-top: 10px;
-        width: 100%;
-        max-width: 1000px;
-        text-align: center;
-        margin: 20px;
-        color: #ebf5ff;
-        font-family: "Times New Roman", Times, serif;
-      }
-      .container2 h1 {
-        padding-top: 40px;
-      }
-      .container2 img {
-        padding-top: 10px;
-        width: 100%;
-      }
-
-      .header {
-        margin-bottom: 20px;
-        padding-bottom: 30px;
-      }
-      .header h1 {
-        color: #6fb2fa;
-        font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
-        text-shadow: 0px 1px 2px #1f1e1e;
-      }
-     
-      .header h1 img {
-        width: 20%;
-
-        border-radius: 50px;
-      }
-      .card-container {
-        display: block;
-        flex-wrap: wrap;
-        justify-content: space-around;
-      }
-      .card {
-        background-color: #007bff;
-        color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        margin: 10px;
-        width: 200px;
-        text-align: center;
-        transition: transform 0.3s, background-color 0.3s;
-      }
-      .card a {
-        text-decoration: none;
-        color: #fff;
-        font-weight: bold;
-      }
-      .card:hover {
-        transform: scale(1.05);
-        background-color: #0056b3;
-      }
-      .footer {
-        margin-top: 20px;
-        font-size: 0.9em;
-        color: #777;
-      }
-      .main_container {
-        display: flex;
-        width: 100%;
-        margin: 100px;
-        margin-top: 0px;
-      }
-   
-    </style>
-  </head>
-  <body>
-    <div class="main_container">
-      <div class="container1">
-        <div class="header">
-          <?php include '../includes/admin_header.php'; ?>
-
-          <h1>Welcome Admin</h1>
-        </div>
-        <div class="card-container">
-          <div class="card">
-            <a href="register_user.php">Register New User</a>
-          </div>
-          <div class="card">
-            <a href="manage_users.php">Manage Users</a>
-          </div>
-          <div class="card">
-            <a href="deposit_fund.php">Deposit Fund</a>
-          </div>
-          <div class="card">
-            <a href="transactions.php">View Transactions</a>
-          </div>
-          <div class="card">
-            <a href="logout.php">Logout</a>
-          </div>
-          <div class="footer">
-      <?php include '../includes/admin_footer.php'; ?>
-    </div>
-        </div>
-      </div>
-      
-      <div class="container2">
-      <?php
+<?php
 require '../db.php';
 session_start();
 
@@ -162,17 +26,15 @@ if (isset($_GET['accno'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = htmlentities($_POST['name']);
     $accno = htmlentities($_POST['accno']);
-    $address = htmlentities($_POST['address']);
-    $email = htmlentities($_POST['email']);
-    $nic = htmlentities($_POST['nic']);
-    $phone = htmlentities($_POST['phone']);
     $date_of_birth = htmlentities($_POST['date_of_birth']);
-
+    $nic = htmlentities($_POST['nic']);
+    $email = htmlentities($_POST['email']);
+    $phone = htmlentities($_POST['phone']);
+    $address = htmlentities($_POST['address']);
+    
     // Update user in the database
     $update_stmt = $conn->prepare("UPDATE users SET name = ?, accno = ?, address = ?, email = ?, nic = ?, phone = ?, date_of_birth = ? WHERE accno = ?");
-    $update_stmt->bind_param("sssssssi", $name, $accno, $address, $email, $nic, $phone, $date_of_birth);
-    
-
+    $update_stmt->bind_param("sssssssi", $name, $accno, $date_of_birth, $nic, $email,  $phone, $address,   $user_id);
     if ($update_stmt->execute()) {
         echo "User updated successfully!";
         header("Location: manage_users.php");
@@ -183,118 +45,625 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit User | Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --primary: #1a5276;
+            --secondary: #2c3e50;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .container {
-            width: 50%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #333;
-        }
-        form {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            padding: 20px;
         }
-        label {
-                    font-size: 16px;
-                    margin-bottom: 5px;
-                    color: #0056b3;
-                    text-align: left;
-                    padding-left: 5px;
-                    padding-bottom: 10px;
-                    
-                }
-                input {
-                    padding: 10px;
-                    margin-bottom: 15px;
-                    border: 1px solid #ccc;
-                    border-radius: 4px;
-                    font-size: 16px;
-                    width: 90%;
-                   margin-left: 20px;
-                   color:rgb(56, 62, 68);
-                }
-                input[type="date"] {
-                    padding: 10px;
-                }
-        button {
+        
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 40px);
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            z-index: 10;
+        }
+        
+        .brand {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .brand h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        
+        .brand p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .admin-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .admin-info h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .admin-info p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .nav-links {
+            flex: 1;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent);
+        }
+        
+        .nav-item i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .logout {
+            margin-top: auto;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 12px;
-            background-color: blue;
+            background: rgba(231, 76, 60, 0.2);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            font-weight: 600;
         }
-        button:hover {
-            background-color: #45a049;
+        
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.3);
         }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
         .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            color: var(--accent);
             text-decoration: none;
-            color: #007bff;
+            font-weight: 500;
+            transition: var(--transition);
         }
+        
         .back-link:hover {
-            text-decoration: underline;
+            color: var(--primary);
         }
-        h1{
-            color: #6fb2fa;
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        /* Edit User Form */
+        .edit-user-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-header h2 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .form-header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .user-badge i {
+            margin-right: 8px;
+        }
+        
+        .edit-user-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .form-input:read-only {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .form-actions {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+        
+        .submit-btn i {
+            margin-left: 8px;
+        }
+        
+        .cancel-btn {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .cancel-btn:hover {
+            background: #e9ecef;
+            color: var(--dark);
+        }
+        
+        .cancel-btn i {
+            margin-right: 8px;
+        }
+        
+        /* Form Sections */
+        .form-section {
+            grid-column: span 2;
+            margin: 20px 0 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .edit-user-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width, .form-actions {
+                grid-column: 1;
+            }
+            
+            .form-section {
+                grid-column: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+            
+            .brand {
+                padding: 15px;
+            }
+            
+            .nav-links {
+                display: flex;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .nav-item {
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                flex-direction: column;
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+            
+            .nav-item:hover, .nav-item.active {
+                border-left-color: transparent;
+                border-bottom-color: var(--accent);
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                margin-bottom: 5px;
+                font-size: 16px;
+            }
+            
+            .admin-profile {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .edit-user-container {
+                padding: 20px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .submit-btn, .cancel-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-<h1>Edit User</h1>
-<div class="container">
-    
-    <form method="POST" action="">
-        <label for="name">Full Name:</label>
-        <input type="text" name="name" value="<?= htmlspecialchars($user['name']) ?>" required><br>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="brand">
+                <h1>Royal Trust Bank</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            
+            <div class="admin-profile">
+                <div class="admin-avatar">A</div>
+                <div class="admin-info">
+                    <h3>Admin User</h3>
+                    <p>System Administrator</p>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="dashboard.php" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="register_user.php" class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register User</span>
+                </a>
+                <a href="manage_users.php" class="nav-item active">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="deposit_fund.php" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Deposit Funds</span>
+                </a>
+                <a href="transactions.php" class="nav-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            
+            <div class="logout">
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Edit User</h1>
+                <a href="manage_users.php" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Users
+                </a>
+            </div>
+            
+            <div class="edit-user-container">
+                <div class="form-header">
+                    <h2>Update User Information</h2>
+                    <p>Edit the details for this banking customer</p>
+                    <div class="user-badge">
+                        <i class="fas fa-user-circle"></i>
+                        Account: <?php echo htmlspecialchars($user['accno']); ?>
+                    </div>
+                </div>
+                
+                <form class="edit-user-form" method="POST" action="">
+                    <!-- Personal Information Section -->
+                    <div class="form-section">Personal Information</div>
+                    
+                    <div class="form-group">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accno" class="form-label">Account Number</label>
+                        <input type="text" id="accno" name="accno" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['accno']); ?>" required readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date_of_birth" class="form-label">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['date_of_birth']); ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nic" class="form-label">NIC Number</label>
+                        <input type="text" id="nic" name="nic" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['nic']); ?>" required>
+                    </div>
+                    
+                    <!-- Contact Information Section -->
+                    <div class="form-section">Contact Information</div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="text" id="phone" name="phone" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['phone']); ?>" required>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" id="address" name="address" class="form-input" 
+                               value="<?php echo htmlspecialchars($user['address']); ?>" required>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="manage_users.php" class="cancel-btn">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="submit-btn">
+                            Update User <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        <label for="accno">Account Number:</label>
-        <input type="text" name="accno" value="<?= htmlspecialchars($user['accno']) ?>" required><br>
-
-        <label for="address">Address:</label>
-        <input type="text" name="address" value="<?= htmlspecialchars($user['address']) ?>" required><br>
-
-        <label for="email">Email:</label>
-        <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" required><br>
-
-        <label for="nic">NIC:</label>
-        <input type="text" name="nic" value="<?= htmlspecialchars($user['nic']) ?>" required><br>
-
-        <label for="phone">Phone Number:</label>
-        <input type="text" name="phone" value="<?= htmlspecialchars($user['phone']) ?>" required><br>
-
-        <label for="date_of_birth">Date of Birth:</label>
-        <input type="date" name="date_of_birth" value="<?= htmlspecialchars($user['date_of_birth']) ?>" required><br>
-
-
-        <button type="submit">Update User</button>
-    </form>
-
-    <a href="manage_users.php" class="back-link">Back to Manage Users</a>
-</div>
-
+    <script>
+        // Form validation
+        const form = document.querySelector('.edit-user-form');
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const inputs = form.querySelectorAll('input[required]');
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.style.borderColor = '#e74c3c';
+                } else {
+                    input.style.borderColor = '#ddd';
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+            }
+        });
+        
+        // Input validation styling
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = '#27ae60';
+                } else {
+                    this.style.borderColor = '#ddd';
+                }
+            });
+            
+            // Initialize border color based on current value
+            if (input.value.trim()) {
+                input.style.borderColor = '#27ae60';
+            }
+        });
+        
+        // Add active class to clicked nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
-
-</div>
