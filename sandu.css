@@ -1,0 +1,181 @@
+* {
+  margin: 0%;
+  padding: 0%;
+  box-sizing: border-box;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+body {
+  background: fixed;
+}
+
+.lgnMain {
+  position: relative;
+  background: linear-gradient(to top left, #000000 100%, #04395e 100%);
+  width: 100%;
+  height: 720px;
+}
+.lgmh1 {
+  color: aliceblue;
+  padding: 5px;
+  padding-bottom: 25px;
+  padding-top: 10px;
+  padding-left: 6%;
+  /* text-shadow: 1px 1px 2px black, 0 0 25px rgb(1, 1, 22), 0 0 5px rgb(1, 1, 28); */
+  text-shadow: 2px 2px 4px #0c0152;
+  background: linear-gradient(to top left, #0a1128 0%, #034078 100%);
+}
+.lgmh1 img {
+  width: 4.5%;
+  border-radius: 50%;
+}
+.lgmh1 h1 {
+  padding-left: 80px;
+  margin-top: -60px;
+  padding-top: -100px;
+}
+.lgmh1 h1 span {
+  font-size: 16px;
+  font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  text-shadow: 2px 2px 4px #434344;
+}
+.lg1 {
+  position: absolute;
+  top: 18%;
+  left: 67%;
+  height: 75%;
+  width: 27%;
+  background-color: transparent;
+  backdrop-filter: 100%;
+  box-shadow: 1px 1px 2px black, 0 0 25px rgb(1, 1, 22), 0 0 5px rgb(1, 1, 28);
+  border-radius: 10px;
+}
+.lg2 {
+  position: absolute;
+  top: 18%;
+  left: 42.5%;
+  height: 75%;
+  width: 27%;
+  border-radius: 10px;
+}
+.lg2 img {
+  width: 100%;
+  height: 100%;
+}
+.lg1 h1 {
+  color: aliceblue;
+  text-align: center;
+  text-shadow: 2px 2px 4px #000000;
+  margin: 30px;
+  padding-bottom: 25px;
+  padding-top: 5px;
+}
+.lgfrm {
+  padding-left: 15%;
+  color: aliceblue;
+  text-shadow: 2px 2px 4px #000000;
+  font-size: 20px;
+}
+.lgfrm form label {
+  padding: 15px;
+}
+.lgfrm form label a {
+  text-decoration: none;
+  color: aliceblue;
+  padding-left: 18%;
+}
+.lgfrm form input {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 75%;
+  height: 30px;
+  background-color: transparent;
+  box-shadow: 1px 1px 2px black, 0 0 25px rgb(1, 1, 22), 0 0 5px rgb(1, 1, 28);
+  border-radius: 5px;
+  border: none;
+  color: aliceblue;
+  text-decoration: none;
+  justify-content: center;
+  text-align: center;
+}
+.lgfrm form select {
+  margin: 20px;
+  background-color: transparent;
+  color: aliceblue;
+  text-shadow: 2px 2px 4px #000000;
+  text-align: center;
+  width: 120px;
+  box-shadow: 1px 1px 2px black, 0 0 25px rgb(1, 1, 22), 0 0 5px rgb(1, 1, 28);
+  padding: 5px;
+  text-decoration: none;
+  font-size: 16px;
+  font-family: "Times New Roman", Times, serif;
+  border: none;
+  margin-top: 40px;
+}
+
+.lgfrm form select option {
+  color: #000000;
+}
+
+.lgfrm form button {
+  margin: 20px;
+  padding: 8px;
+  text-align: center;
+  width: 35%;
+  background-color: transparent;
+  border-radius: 10px;
+  border: none;
+  color: aliceblue;
+  box-shadow: 1px 1px 2px black, 0 0 25px rgb(1, 1, 22), 0 0 5px rgb(1, 1, 28);
+  margin-left: 22%;
+  margin-top: 50px;
+}
+.lgfrm form button:hover {
+  color: #ffffff;
+  box-shadow: 1px 1px 2px rgb(255, 255, 255), 0 0 25px rgb(255, 255, 255),
+    0 0 5px rgb(243, 243, 243);
+}
+.lg2 {
+  position: absolute;
+  top: 15%;
+  left: 3%;
+  height: 75%;
+  width: 58%;
+  background-color: transparent;
+  display: flex;
+}
+.lg2 video {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  padding-top: 0%;
+  box-shadow: 1px 1px 2px rgb(255, 255, 255), 0 0 25px rgb(255, 255, 255),
+    0 0 5px rgb(243, 243, 243);
+}
+.lg2 p {
+  margin: 0%;
+  padding: 0%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 25px;
+  color: aliceblue;
+  text-shadow: 2px 2px 4px #000000;
+}
+.lg2sub {
+  padding: 10px;
+  margin-left: 25px;
+}
+.v1 {
+  margin-top: 0px;
+  margin-right: 10px;
+}
+.v2 {
+  margin-top: 15px;
+  margin-right: 20px;
+}
+.v3 {
+  margin-top: 30px;
+  margin-right: 10px;
+}

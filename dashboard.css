@@ -1,0 +1,76 @@
+/* User-friendly CSS for Banking System */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+header {
+    background: #007bff;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+}
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    background: #333;
+    border-radius: 0 0 10px 10px;
+}
+nav ul li {
+    margin: 0 15px;
+}
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 15px 20px;
+    display: block;
+}
+nav ul li a:hover {
+    background: #007bff;
+    border-radius: 5px;
+}
+main {
+    padding: 20px;
+    text-align: center;
+}
+.balance {
+    background: #e3f2fd;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+.btn {
+    display: inline-block;
+    padding: 12px 20px;
+    margin-top: 15px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+.btn:hover {
+    background: #0056b3;
+}
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #333;
+    color: white;
+    border-radius: 0 0 10px 10px;
+    margin-top: 20px;
+}

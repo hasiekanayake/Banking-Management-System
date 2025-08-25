@@ -1,0 +1,59 @@
+
+/* CSS for the footer */
+.footer-container {
+    background-color: #000; /* Black background */
+    color: #fff; /* White text color */
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.footer-section {
+    flex: 1;
+    margin: 10px;
+    min-width: 200px;
+}
+
+.footer-section h3 {
+    border-bottom: 2px solid #fff;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin: 8px 0;
+}
+
+.footer-section ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+    text-decoration: underline;
+}
+
+.contact p {
+    margin: 8px 0;
+}
+
+.contact p i.icon {
+    margin-right: 5px;
+}
+
+.contact a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.contact a:hover {
+    text-decoration: underline;
+}
+
+
