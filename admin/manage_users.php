@@ -23,6 +23,7 @@ if (isset($_GET['delete'])) {
 $result = $conn->query("SELECT accno, name, email, balance, status FROM users WHERE status = 'active'");
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,6 +57,18 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
             color: #333;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 40px);
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
         
         /* Sidebar Navigation */
@@ -206,14 +219,31 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
             font-weight: 500;
         }
         
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .back-link:hover {
+            color: var(--primary);
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
         /* Users Table */
-        .users-table-container {
+        .users-container {
             background: white;
             border-radius: 12px;
             padding: 25px;
             box-shadow: var(--card-shadow);
             margin-bottom: 30px;
-            overflow-x: auto;
+            overflow: hidden;
         }
         
         .table-header {
@@ -223,19 +253,13 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
             margin-bottom: 20px;
         }
         
-        .table-title {
-            font-size: 18px;
-            color: var(--dark);
-            font-weight: 600;
-        }
-        
         .search-box {
             display: flex;
             align-items: center;
             background: #f5f7fa;
-            border-radius: 6px;
+            border-radius: 8px;
             padding: 8px 15px;
-            width: 250px;
+            width: 300px;
         }
         
         .search-box input {
@@ -248,38 +272,59 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
         
         .search-box i {
             color: #7f8c8d;
+            margin-right: 8px;
         }
         
-        table {
+        .users-table {
             width: 100%;
             border-collapse: collapse;
         }
         
-        thead {
-            background: #f5f7fa;
-        }
-        
-        th {
-            text-align: left;
+        .users-table th {
+            background-color: #f8f9fa;
             padding: 15px;
+            text-align: left;
             font-weight: 600;
             color: var(--dark);
             border-bottom: 2px solid #eaeaea;
         }
         
-        td {
+        .users-table td {
             padding: 15px;
             border-bottom: 1px solid #eaeaea;
-            color: #2c3e50;
+            color: #555;
         }
         
-        tr:hover {
-            background: #f9fafb;
+        .users-table tr:last-child td {
+            border-bottom: none;
         }
         
-        .status-badge {
+        .users-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .account-number {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .user-email {
+            color: #7f8c8d;
+        }
+        
+        .balance {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .status {
             display: inline-block;
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
@@ -287,12 +332,7 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
         
         .status-active {
             background: rgba(39, 174, 96, 0.15);
-            color: #27ae60;
-        }
-        
-        .balance {
-            font-weight: 600;
-            color: #2c3e50;
+            color: var(--success);
         }
         
         .action-buttons {
@@ -301,13 +341,13 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
         }
         
         .btn {
-            padding: 8px 12px;
+            padding: 8px 15px;
+            border: none;
             border-radius: 6px;
+            cursor: pointer;
             font-size: 13px;
             font-weight: 500;
-            cursor: pointer;
             transition: var(--transition);
-            border: none;
             display: flex;
             align-items: center;
         }
@@ -334,16 +374,40 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
             background: rgba(231, 76, 60, 0.25);
         }
         
+        /* No Users Message */
+        .no-users {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .no-users i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        .no-users p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
         /* Responsive Design */
         @media (max-width: 1024px) {
-            .sidebar {
-                width: 220px;
+            .users-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .search-box {
+                width: 250px;
             }
         }
         
         @media (max-width: 768px) {
-            body {
+            .dashboard-container {
                 flex-direction: column;
+                height: auto;
             }
             
             .sidebar {
@@ -388,7 +452,11 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
                 padding: 20px;
             }
             
-            .page-header {
+            .users-container {
+                padding: 15px;
+            }
+            
+            .table-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
@@ -398,248 +466,188 @@ $result = $conn->query("SELECT accno, name, email, balance, status FROM users WH
                 width: 100%;
             }
             
-            .users-table-container {
-                padding: 15px;
-            }
-            
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-            
             .action-buttons {
                 flex-direction: column;
                 gap: 5px;
+            }
+            
+            .btn {
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="brand">
-            <h1>Royal Trust Bank</h1>
-            <p>Admin Dashboard</p>
-        </div>
-        
-        <div class="admin-profile">
-            <div class="admin-avatar">A</div>
-            <div class="admin-info">
-                <h3>Admin User</h3>
-                <p>System Administrator</p>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="brand">
+                <h1>Royal Trust Bank</h1>
+                <p>Admin Dashboard</p>
             </div>
-        </div>
-        
-        <div class="nav-links">
-            <a href="dashboard.php" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="register_user.php" class="nav-item">
-                <i class="fas fa-user-plus"></i>
-                <span>Register User</span>
-            </a>
-            <a href="manage_users.php" class="nav-item active">
-                <i class="fas fa-users-cog"></i>
-                <span>Manage Users</span>
-            </a>
-            <a href="deposit_fund.php" class="nav-item">
-                <i class="fas fa-money-bill-wave"></i>
-                <span>Deposit Funds</span>
-            </a>
-            <a href="transactions.php" class="nav-item">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Transactions</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a>
-        </div>
-        
-        <div class="logout">
-            <button class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </button>
-        </div>
-    </div>
-    
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Manage Users</h1>
-            <div class="user-count">
-                <i class="fas fa-users"></i>
-                <span id="user-count">5 Active Users</span>
-            </div>
-        </div>
-        
-        <div class="users-table-container">
-            <div class="table-header">
-                <h2 class="table-title">Active Users</h2>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search users..." id="search-input">
+            
+            <div class="admin-profile">
+                <div class="admin-avatar">A</div>
+                <div class="admin-info">
+                    <h3>Admin User</h3>
+                    <p>System Administrator</p>
                 </div>
             </div>
             
-            <table>
-                <thead>
-                    <tr>
-                        <th>Account Number</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Balance</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>100001</td>
-                        <td>John Smith</td>
-                        <td>john.smith@example.com</td>
-                        <td class="balance">LKR 25,450.00</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-deactivate">
-                                    <i class="fas fa-user-times"></i> Deactivate
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>100002</td>
-                        <td>Emma Johnson</td>
-                        <td>emma.j@example.com</td>
-                        <td class="balance">LKR 18,720.50</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-deactivate">
-                                    <i class="fas fa-user-times"></i> Deactivate
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>100003</td>
-                        <td>Michael Brown</td>
-                        <td>m.brown@example.com</td>
-                        <td class="balance">LKR 52,890.75</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-deactivate">
-                                    <i class="fas fa-user-times"></i> Deactivate
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>100004</td>
-                        <td>Sarah Williams</td>
-                        <td>sarahw@example.com</td>
-                        <td class="balance">LKR 12,340.00</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-deactivate">
-                                    <i class="fas fa-user-times"></i> Deactivate
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>100005</td>
-                        <td>David Miller</td>
-                        <td>d.miller@example.com</td>
-                        <td class="balance">LKR 37,650.25</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-deactivate">
-                                    <i class="fas fa-user-times"></i> Deactivate
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="nav-links">
+                <a href="dashboard.php" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="register_user.php" class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register User</span>
+                </a>
+                <a href="manage_users.php" class="nav-item active">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="deposit_fund.php" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Deposit Funds</span>
+                </a>
+                <a href="transactions.php" class="nav-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            
+            <div class="logout">
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Manage Users</h1>
+                    <span class="user-count"><?php echo $result->num_rows; ?> Active Users</span>
+                </div>
+                <a href="dashboard.php" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+            
+            <div class="users-container">
+                <div class="table-header">
+                    <h2>Active Users</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search users..." id="searchInput">
+                    </div>
+                </div>
+                
+                <?php if ($result->num_rows > 0): ?>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Account Number</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Balance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><span class="account-number"><?php echo $row['accno']; ?></span></td>
+                            <td><span class="user-name"><?php echo $row['name']; ?></span></td>
+                            <td><span class="user-email"><?php echo $row['email']; ?></span></td>
+                            <td><span class="balance">LKR <?php echo number_format($row['balance'], 2); ?></span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="edit_user.php?accno=<?php echo $row['accno']; ?>" class="btn btn-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="?delete=<?php echo $row['accno']; ?>" class="btn btn-deactivate" onclick="return confirmDeactivate()">
+                                        <i class="fas fa-user-times"></i> Deactivate
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                <div class="no-users">
+                    <i class="fas fa-users"></i>
+                    <p>No active users found.</p>
+                    <a href="register_user.php" class="btn btn-edit">
+                        <i class="fas fa-user-plus"></i> Register New User
+                    </a>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Search functionality
-        document.getElementById('search-input').addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.users-table tbody tr');
             
             rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchValue) ? '' : 'none';
-            });
-        });
-        
-        // Deactivate user confirmation
-        document.querySelectorAll('.btn-deactivate').forEach(button => {
-            button.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const accountNumber = row.querySelector('td:first-child').textContent;
-                const userName = row.querySelector('td:nth-child(2)').textContent;
+                const name = row.querySelector('.user-name').textContent.toLowerCase();
+                const email = row.querySelector('.user-email').textContent.toLowerCase();
+                const account = row.querySelector('.account-number').textContent.toLowerCase();
                 
-                Swal.fire({
-                    title: 'Deactivate User?',
-                    html: `Are you sure you want to deactivate <strong>${userName}</strong> (Account: ${accountNumber})?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e74c3c',
-                    cancelButtonColor: '#7f8c8d',
-                    confirmButtonText: 'Yes, deactivate',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Simulate deactivation
-                        row.style.opacity = '0.5';
-                        Swal.fire(
-                            'Deactivated!',
-                            'User account has been deactivated.',
-                            'success'
-                        );
-                    }
-                });
+                if (name.includes(searchText) || email.includes(searchText) || account.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
         });
         
-        // Update user count
-        function updateUserCount() {
-            const visibleRows = document.querySelectorAll('tbody tr:not([style*="display: none"])').length;
-            document.getElementById('user-count').textContent = `${visibleRows} Active Users`;
+        // Confirmation for deactivation
+        function confirmDeactivate() {
+            event.preventDefault();
+            const href = event.target.getAttribute('href');
+            
+            Swal.fire({
+                title: 'Deactivate User?',
+                text: "This user will no longer be able to access their account.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#7f8c8d',
+                confirmButtonText: 'Yes, deactivate!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = href;
+                }
+            });
+            
+            return false;
         }
         
-        // Initial user count
-        updateUserCount();
-        
-        // Update count when searching
-        document.getElementById('search-input').addEventListener('input', updateUserCount);
+        // Add active class to clicked nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
