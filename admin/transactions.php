@@ -1,305 +1,709 @@
-
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
-    <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f6f8;
-        color: #333;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-       
-      }
-      .container1 {
-        background-color: #000000;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        width: 20%;
-        max-width: 900px;
-        text-align: center;
-        margin: 20px;
-        height:600px;
-      }
-      .container2 {
-        background-color: #000000;
-        border-radius: 10px;
-        box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        padding-top: 10px;
-        width: 100%;
-        max-width: 1000px;
-        text-align: center;
-        margin: 20px;
-        color: #ebf5ff;
-        font-family: "Times New Roman", Times, serif;
-      }
-      .container2 h1 {
-        padding-top: 40px;
-      }
-      .container2 img {
-        padding-top: 10px;
-        width: 100%;
-      }
-
-      .header {
-        margin-bottom: 20px;
-        padding-bottom: 30px;
-      }
-      .header h1 {
-        color: #6fb2fa;
-        font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
-        text-shadow: 0px 1px 2px #1f1e1e;
-      }
-     
-      .header h1 img {
-        width: 20%;
-
-        border-radius: 50px;
-      }
-      .card-container {
-        display: block;
-        flex-wrap: wrap;
-        justify-content: space-around;
-      }
-      .card {
-        background-color: #007bff;
-        color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        margin: 10px;
-        width: 200px;
-        text-align: center;
-        transition: transform 0.3s, background-color 0.3s;
-      }
-      .card a {
-        text-decoration: none;
-        color: #fff;
-        font-weight: bold;
-      }
-      .card:hover {
-        transform: scale(1.05);
-        background-color: #0056b3;
-      }
-      .footer {
-        margin-top: 20px;
-        font-size: 0.9em;
-        color: #777;
-      }
-      .main_container {
-        display: flex;
-        width: 100%;
-        margin: 100px;
-        margin-top: 0px;
-      }
-      .back-btn {
-            display: block;
-            margin-top: 40px;
-            text-align: center;
-            text-decoration: none;
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            width:25%;
-            margin-left:600px;
-        }
-   
-    </style>
-  </head>
-  <body>
-    <div class="main_container">
-      <div class="container1">
-        <div class="header">
-          <?php include '../includes/admin_header.php'; ?>
-
-          <h1>Welcome Admin</h1>
-        </div>
-        <div class="card-container">
-          <div class="card">
-            <a href="register_user.php">Register New User</a>
-          </div>
-          <div class="card">
-            <a href="manage_users.php">Manage Users</a>
-          </div>
-          <div class="card">
-            <a href="deposit_fund.php">Deposit Fund</a>
-          </div>
-          <div class="card">
-            <a href="transactions.php">View Transactions</a>
-          </div>
-          <div class="card">
-            <a href="logout.php">Logout</a>
-          </div>
-          <div class="footer">
-      <?php include '../includes/admin_footer.php'; ?>
-    </div>
-        </div>
-      </div>
-      
-    
-  </body>
-</html>
-
 <?php
-require '../db.php';
-session_start();
-
-if (!isset($_SESSION['admin'])) {
-    header("Location: index.php");
-    exit;
-}
-
-// Handle form submission for date range filter
-$start_date = isset($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d');
-$end_date = isset($_POST['end_date']) ? $_POST['end_date'] : date('Y-m-d');
-
-// Fetch transactions based on the selected date range
-$stmt = $conn->prepare("SELECT t.id, u.name, t.type, t.amount, t.timestamp 
-                        FROM transactions t
-                        JOIN users u ON t.user_id = u.id
-                        WHERE t.timestamp BETWEEN ? AND ?
-                        ORDER BY t.timestamp DESC");
-$stmt->bind_param("ss", $start_date, $end_date);
-$stmt->execute();
-$result = $stmt->get_result();
-?>
+    require '../db.php';
+    session_start();
+    
+    if (!isset($_SESSION['admin'])) {
+        header("Location: index.php");
+        exit;
+    }
+    
+    // Handle form submission for date range filter
+    $start_date = isset($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-01');
+    $end_date = isset($_POST['end_date']) ? $_POST['end_date'] : date('Y-m-d');
+    
+    // Fetch transactions based on the selected date range
+    $stmt = $conn->prepare("SELECT t.id, u.name, t.type, t.amount, t.timestamp 
+                            FROM transactions t
+                            JOIN users u ON t.user_id = u.id
+                            WHERE DATE(t.timestamp) BETWEEN ? AND ?
+                            ORDER BY t.timestamp DESC");
+    $stmt->bind_param("ss", $start_date, $end_date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $transactions_count = $result->num_rows;
+    ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Transactions by Time Period</title>
+    <title>Transactions | Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
+        :root {
+            --primary: #1a5276;
+            --secondary: #2c3e50;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .container {
-            width: 80%;
-            max-width: 1000px;
-            margin: 20px auto;
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             padding: 20px;
-            background-color: #ffffff;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 40px);
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            z-index: 10;
+        }
+        
+        .brand {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .brand h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .brand p {
+            font-size: 12px;
+            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        h1 {
-            text-align: center;
-            color: black;
-            margin-bottom: 20px;
+        
+        .admin-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 15px;
+            color: white;
         }
-        form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        form input {
-            padding: 10px;
+        
+        .admin-info h3 {
             font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 50px;
-            margin-left: 50px;
-            margin-top: 25px;
+            margin-bottom: 5px;
+            color: white;
         }
-        form button {
-            padding: 10px 20px;
-            background-color: #007bff;
+        
+        .admin-info p {
+            font-size: 12px;
+            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .nav-links {
+            flex: 1;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent);
+        }
+        
+        .nav-item i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .logout {
+            margin-top: auto;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background: rgba(231, 76, 60, 0.2);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            width : 150px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            font-weight: 600;
         }
-        form button:hover {
-            background-color: #0056b3;
+        
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 0.3);
         }
-        table {
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .transactions-count {
+            background: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .back-link:hover {
+            color: var(--primary);
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        /* Filter Section */
+        .filter-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+        
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .filter-header h2 {
+            font-size: 20px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .filter-form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .form-group {
+            margin-bottom: 0;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .filter-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .filter-btn:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn i {
+            margin-right: 8px;
+        }
+        
+        /* Transactions Table */
+        .transactions-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .table-header h2 {
+            font-size: 20px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .export-btn {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .export-btn:hover {
+            background: rgba(46, 204, 113, 0.2);
+        }
+        
+        .export-btn i {
+            margin-right: 5px;
+        }
+        
+        .transactions-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+        }
+        
+        .transactions-table th {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .transactions-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eaeaea;
+            color: #555;
+        }
+        
+        .transactions-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .transactions-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .transaction-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .transaction-type {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .type-credit {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+        }
+        
+        .type-debit {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+        }
+        
+        .amount-credit {
+            color: var(--success);
+        }
+        
+        .amount-debit {
+            color: var(--danger);
+        }
+        
+        .transaction-date {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        /* No Transactions Message */
+        .no-transactions {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .no-transactions i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        .no-transactions p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .filter-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
             
+            .transactions-table {
+                display: block;
+                overflow-x: auto;
+            }
         }
-        table th, table td {
-            padding: 12px 15px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        table th {
-            background-color: #071330;
-            color: #ffffff;
-        }
-        table tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        table tr:hover {
-            background-color: #e9e9e9;
-        }
-        .back-btn {
-            display: block;
-            margin-top: 20px;
-            text-align: center;
-            text-decoration: none;
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            width:25%;
-        }
-        .back-btn:hover {
-            background-color: #0056b3;
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+            
+            .brand {
+                padding: 15px;
+            }
+            
+            .nav-links {
+                display: flex;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .nav-item {
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                flex-direction: column;
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+            
+            .nav-item:hover, .nav-item.active {
+                border-left-color: transparent;
+                border-bottom-color: var(--accent);
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                margin-bottom: 5px;
+                font-size: 16px;
+            }
+            
+            .admin-profile {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .filter-container, .transactions-container {
+                padding: 15px;
+            }
+            
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Transactions for Selected Period</h1>
-
-        <!-- Date Range Filter Form -->
-        <form method="POST" action="">
-            <input type="date" name="start_date" value="<?= $start_date ?>" required>
-            <input type="date" name="end_date" value="<?= $end_date ?>" required><br><br>
-            <button type="submit">SEARCH</button>
-        </form>
-
-        <!-- Transactions Table -->
-        <table>
-            <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>User Name</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $result->fetch_assoc()) : ?>
-                    <tr>
-                        <td><?= $row['id'] ?></td>
-                        <td><?= $row['name'] ?></td>
-                        <td><?= ucfirst($row['type']) ?></td>
-                        <td>LKR <?= number_format($row['amount'], 2) ?></td>
-                        <td><?= $row['timestamp'] ?></td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-
-        <a href="dashboard.php" class="back-btn">Back to Dashboard</a>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="brand">
+                <h1>Royal Trust Bank</h1>
+                <p>Admin Dashboard</p>
+            </div>
+            
+            <div class="admin-profile">
+                <div class="admin-avatar">A</div>
+                <div class="admin-info">
+                    <h3>Admin User</h3>
+                    <p>System Administrator</p>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="dashboard.php" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="register_user.php" class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register User</span>
+                </a>
+                <a href="manage_users.php" class="nav-item">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="deposit_fund.php" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Deposit Funds</span>
+                </a>
+                <a href="transactions.php" class="nav-item active">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            
+            <div class="logout">
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Transaction History</h1>
+                    <span class="transactions-count"><?php echo $transactions_count; ?> Transactions</span>
+                </div>
+                <a href="dashboard.php" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Filter Section -->
+            <div class="filter-container">
+                <div class="filter-header">
+                    <h2>Filter Transactions by Date Range</h2>
+                </div>
+                
+                <form class="filter-form" method="POST" action="">
+                    <div class="form-group">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" id="start_date" name="start_date" class="form-input" 
+                               value="<?php echo $start_date; ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" id="end_date" name="end_date" class="form-input" 
+                               value="<?php echo $end_date; ?>" required>
+                    </div>
+                    
+                    <button type="submit" class="filter-btn">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Transactions Table -->
+            <div class="transactions-container">
+                <div class="table-header">
+                    <h2>Transaction Records</h2>
+                    <button class="export-btn">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                </div>
+                
+                <?php if ($transactions_count > 0): ?>
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><span class="transaction-id">#<?php echo $row['id']; ?></span></td>
+                            <td><span class="user-name"><?php echo $row['name']; ?></span></td>
+                            <td>
+                                <span class="transaction-type <?php echo 'type-' . $row['type']; ?>">
+                                    <?php echo ucfirst($row['type']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="transaction-amount <?php echo 'amount-' . $row['type']; ?>">
+                                    LKR <?php echo number_format($row['amount'], 2); ?>
+                                </span>
+                            </td>
+                            <td><span class="transaction-date"><?php echo $row['timestamp']; ?></span></td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                <div class="no-transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <p>No transactions found for the selected period.</p>
+                    <p>Try adjusting your date range.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Set default dates to current month
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add active class to clicked nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+            
+            // Set end date to today if not set
+            if (!document.getElementById('end_date').value) {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('end_date').value = today;
+            }
+            
+            // Set start date to first day of month if not set
+            if (!document.getElementById('start_date').value) {
+                const today = new Date();
+                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+                document.getElementById('start_date').value = firstDay;
+            }
+        });
+    </script>
 </body>
 </html>

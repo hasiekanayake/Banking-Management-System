@@ -1,3 +1,44 @@
+<?php
+require '../db.php';
+session_start();
+
+// Redirect to login if not authenticated
+if (!isset($_SESSION['admin'])) {
+    header("Location: index.php");
+    exit;
+}
+
+// Fetch statistics from database
+$total_users = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'active'")->fetch_assoc()['count'];
+$total_deposits = $conn->query("SELECT SUM(balance) as total FROM users")->fetch_assoc()['total'];
+$total_transactions = $conn->query("SELECT COUNT(*) as count FROM transactions")->fetch_assoc()['count'];
+
+// Format the total deposits
+$formatted_deposits = $total_deposits ? number_format($total_deposits, 2) : '0.00';
+
+// Fetch recent activities
+$recent_activities = $conn->query("
+    SELECT 
+        t.type, 
+        t.amount, 
+        t.timestamp, 
+        u.name as user_name,
+        CASE 
+            WHEN t.type = 'credit' THEN 'Deposit Processed'
+            WHEN t.type = 'debit' THEN 'Withdrawal Processed'
+            ELSE 'Transaction Processed'
+        END as activity_type,
+        CASE 
+            WHEN t.type = 'credit' THEN CONCAT('LKR ', FORMAT(t.amount, 2), ' deposited to account')
+            WHEN t.type = 'debit' THEN CONCAT('LKR ', FORMAT(t.amount, 2), ' withdrawn from account')
+            ELSE 'Transaction completed'
+        END as activity_description
+    FROM transactions t
+    JOIN users u ON t.user_id = u.id
+    ORDER BY t.timestamp DESC 
+    LIMIT 4
+");
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,11 +104,13 @@
             font-size: 24px;
             margin-bottom: 5px;
             font-weight: 700;
+            color: white;
         }
         
         .brand p {
             font-size: 12px;
             opacity: 0.8;
+            color: rgba(255, 255, 255, 0.8);
         }
         
         .admin-profile {
@@ -76,6 +119,7 @@
             padding: 15px 20px;
             margin-bottom: 20px;
             background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
         }
         
         .admin-avatar {
@@ -89,16 +133,19 @@
             font-size: 20px;
             font-weight: bold;
             margin-right: 15px;
+            color: white;
         }
         
         .admin-info h3 {
             font-size: 16px;
             margin-bottom: 5px;
+            color: white;
         }
         
         .admin-info p {
             font-size: 12px;
             opacity: 0.8;
+            color: rgba(255, 255, 255, 0.8);
         }
         
         .nav-links {
@@ -146,6 +193,7 @@
             transition: var(--transition);
             width: 100%;
             font-weight: 600;
+            text-decoration: none;
         }
         
         .logout-btn:hover {
@@ -161,6 +209,7 @@
             flex: 1;
             padding: 30px;
             overflow-y: auto;
+            background: #f9fafb;
         }
         
         .welcome-banner {
@@ -483,13 +532,13 @@
             <div class="admin-profile">
                 <div class="admin-avatar">A</div>
                 <div class="admin-info">
-                    <h3>Admin User</h3>
+                    <h3><?php echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin User'); ?></h3>
                     <p>System Administrator</p>
                 </div>
             </div>
             
             <div class="nav-links">
-                <a href="#" class="nav-item active">
+                <a href="dashboard.php" class="nav-item active">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </a>
@@ -509,17 +558,17 @@
                     <i class="fas fa-exchange-alt"></i>
                     <span>Transactions</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="logout.php" class="nav-item">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
                 </a>
             </div>
             
             <div class="logout">
-                <button class="logout-btn">
+                <a href="logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
-                </button>
+                </a>
             </div>
         </div>
         
@@ -527,12 +576,12 @@
         <div class="main-content">
             <div class="welcome-banner">
                 <div class="welcome-text">
-                    <h2>Welcome back, Admin!</h2>
+                    <h2>Welcome back, <?php echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin'); ?>!</h2>
                     <p>Manage your banking system efficiently with this admin dashboard. Monitor transactions, manage users, and oversee financial operations.</p>
                 </div>
                 <div class="date-display">
                     <i class="fas fa-calendar-alt"></i>
-                    <span id="current-date">October 16, 2023</span>
+                    <span id="current-date"><?php echo date('F j, Y'); ?></span>
                 </div>
             </div>
             
@@ -543,7 +592,7 @@
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>2,548</h3>
+                        <h3><?php echo $total_users; ?></h3>
                         <p>Total Users</p>
                     </div>
                 </div>
@@ -553,7 +602,7 @@
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>$8.2M</h3>
+                        <h3>LKR <?php echo $formatted_deposits; ?></h3>
                         <p>Total Deposits</p>
                     </div>
                 </div>
@@ -563,7 +612,7 @@
                         <i class="fas fa-exchange-alt"></i>
                     </div>
                     <div class="stat-info">
-                        <h3>12,487</h3>
+                        <h3><?php echo $total_transactions; ?></h3>
                         <p>Transactions</p>
                     </div>
                 </div>
@@ -634,68 +683,49 @@
             <div class="recent-activity">
                 <div class="section-header">
                     <h2>Recent Activity</h2>
-                    <a href="#">View All</a>
+                    <a href="transactions.php">View All</a>
                 </div>
                 
                 <ul class="activity-list">
-                    <li class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>New User Registered</h4>
-                            <p>John Doe created a new savings account</p>
-                        </div>
-                        <div class="activity-time">2 hours ago</div>
-                    </li>
-                    
-                    <li class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>Deposit Processed</h4>
-                            <p>$2,500 deposited to account #XXXX7890</p>
-                        </div>
-                        <div class="activity-time">5 hours ago</div>
-                    </li>
-                    
-                    <li class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>Security Update</h4>
-                            <p>System security patches applied successfully</p>
-                        </div>
-                        <div class="activity-time">Yesterday</div>
-                    </li>
-                    
-                    <li class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-exchange-alt"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>Wire Transfer</h4>
-                            <p>International transfer completed to UK bank</p>
-                        </div>
-                        <div class="activity-time">October 15, 2023</div>
-                    </li>
+                    <?php if ($recent_activities->num_rows > 0): ?>
+                        <?php while ($activity = $recent_activities->fetch_assoc()): ?>
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-<?php echo $activity['type'] === 'credit' ? 'dollar-sign' : 'exchange-alt'; ?>"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4><?php echo htmlspecialchars($activity['activity_type']); ?></h4>
+                                <p><?php echo htmlspecialchars($activity['activity_description']); ?> - <?php echo htmlspecialchars($activity['user_name']); ?></p>
+                            </div>
+                            <div class="activity-time">
+                                <?php 
+                                $timestamp = strtotime($activity['timestamp']);
+                                echo date('M j, Y g:i A', $timestamp); 
+                                ?>
+                            </div>
+                        </li>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>No Recent Activity</h4>
+                                <p>There are no recent transactions to display</p>
+                            </div>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
     </div>
     
     <footer class="dashboard-footer">
-        <p>© 2023 Royal Trust Bank. All rights reserved. | Secure Banking System</p>
+        <p>© <?php echo date('Y'); ?> Royal Trust Bank. All rights reserved. | Secure Banking System</p>
     </footer>
 
     <script>
-        // Set current date
-        const now = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
-        
         // Add active class to clicked nav items
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
